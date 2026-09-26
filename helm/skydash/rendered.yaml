@@ -1,0 +1,644 @@
+---
+# Source: skydash/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth-secret
+  namespace: skydash
+type: Opaque
+stringData:
+  MONGO_URI: ""
+  JWT_SECRET: ""
+
+---
+# Source: skydash/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: restaurant-secret
+  namespace: skydash
+type: Opaque
+stringData:
+  MONGO_URI: ""
+  JWT_SECRET: ""
+
+---
+# Source: skydash/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: delivery-secret
+  namespace: skydash
+type: Opaque
+stringData:
+  MONGO_URI: ""
+  JWT_SECRET: ""
+
+---
+# Source: skydash/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: payment-secret
+  namespace: skydash
+type: Opaque
+stringData:
+  MONGO_URI: ""
+  STRIPE_SECRET_KEY: ""
+
+---
+# Source: skydash/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-secret
+  namespace: skydash
+type: Opaque
+stringData:
+  MONGO_URI: ""
+  JWT_SECRET: ""
+---
+# Source: skydash/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+  namespace: skydash
+data:
+  PORT: "5001"
+  JWT_EXPIRES_IN: "1d"
+
+---
+# Source: skydash/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restaurant-config
+  namespace: skydash
+data:
+  PORT: "5002"
+  JWT_EXPIRES_IN: "1d"
+
+---
+# Source: skydash/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: delivery-config
+  namespace: skydash
+data:
+  PORT: "5003"
+  JWT_EXPIRES_IN: "1d"
+
+---
+# Source: skydash/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-config
+  namespace: skydash
+data:
+  PORT: "5004"
+  JWT_EXPIRES_IN: "1d"
+
+---
+# Source: skydash/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+  namespace: skydash
+data:
+  PORT: "5005"
+  JWT_EXPIRES_IN: "1d"
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-service
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: delivery-service
+  ports:
+    - protocol: TCP
+      port: 5003
+      targetPort: 5003
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-frontend-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: delivery-frontend-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - protocol: TCP
+      port: 5005
+      targetPort: 5005
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: payment-service
+  ports:
+    - protocol: TCP
+      port: 5004
+      targetPort: 5004
+
+---
+# Source: skydash/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: restaurant-service
+  namespace: skydash
+spec:
+  type: ClusterIP
+  selector:
+    app: restaurant-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: auth-service
+
+  template:
+    metadata:
+      labels:
+        app: auth-service
+
+    spec:
+      containers:
+        - name: auth-service
+          image: "auth-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5001
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          envFrom:
+            - configMapRef:
+                name: auth-config
+            - secretRef:
+                name: auth-secret
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: delivery-service
+
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+
+    spec:
+      containers:
+        - name: delivery-service
+          image: "delivery-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5003
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          envFrom:
+            - configMapRef:
+                name: delivery-config
+            - secretRef:
+                name: delivery-secret
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-frontend-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: delivery-frontend-service
+
+  template:
+    metadata:
+      labels:
+        app: delivery-frontend-service
+
+    spec:
+      containers:
+        - name: delivery-frontend-service
+          image: "delivery-frontend-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 3000
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend-service
+
+  template:
+    metadata:
+      labels:
+        app: frontend-service
+
+    spec:
+      containers:
+        - name: frontend-service
+          image: "frontend-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 3000
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: order-service
+
+  template:
+    metadata:
+      labels:
+        app: order-service
+
+    spec:
+      containers:
+        - name: order-service
+          image: "order-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5005
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          envFrom:
+            - configMapRef:
+                name: order-config
+            - secretRef:
+                name: order-secret
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: payment-service
+
+  template:
+    metadata:
+      labels:
+        app: payment-service
+
+    spec:
+      containers:
+        - name: payment-service
+          image: "payment-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5004
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          envFrom:
+            - configMapRef:
+                name: payment-config
+            - secretRef:
+                name: payment-secret
+
+
+---
+# Source: skydash/templates/deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: restaurant-service
+
+  template:
+    metadata:
+      labels:
+        app: restaurant-service
+
+    spec:
+      containers:
+        - name: restaurant-service
+          image: "restaurant-service:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5002
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+            - secretRef:
+                name: restaurant-secret
+
+
+---
+# Source: skydash/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+  namespace: skydash
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+
+  minReplicas: 2
+  maxReplicas: 5
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+---
+# Source: skydash/templates/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: restaurant-service-hpa
+  namespace: skydash
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: restaurant-service
+
+  minReplicas: 2
+  maxReplicas: 5
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+---
+# Source: skydash/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: skydash-ingress
+  namespace: skydash
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - http:
+        paths:
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 3000
+
+          - path: /api/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 5001
+
+          - path: /api/restaurant
+            pathType: Prefix
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 5002
+
+          - path: /api/superadmin
+            pathType: Prefix
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 5002
+
+          - path: /api/food-items
+            pathType: Prefix
+            backend:
+              service:
+                name: restaurant-service
+                port:
+                  number: 5002
+
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 5005
+
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 5005
+
+          - path: /api/payment
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 5004

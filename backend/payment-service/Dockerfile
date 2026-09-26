@@ -1,5 +1,5 @@
 # Use a specific version of the Node.js slim image
-FROM node:18.16.0-slim
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app

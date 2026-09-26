@@ -15,7 +15,7 @@ function CustomerHome() {
     const fetchRestaurants = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5002/api/superadmin/restaurants', {
+        const res = await fetch('/api/restaurant/restaurants', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

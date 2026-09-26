@@ -1,0 +1,82 @@
+services:
+
+  auth:
+    name: auth-service
+    image:
+      repository: auth-service
+      tag: latest
+    replicas: 1
+    port: 5001
+    configMap: auth-config
+    secret: auth-secret
+
+  restaurant:
+    name: restaurant-service
+    image:
+      repository: restaurant-service
+      tag: latest
+    replicas: 1
+    port: 5002
+    configMap: restaurant-config
+    secret: restaurant-secret
+
+  delivery:
+    name: delivery-service
+    image:
+      repository: delivery-service
+      tag: latest
+    replicas: 1
+    port: 5003
+    configMap: delivery-config
+    secret: delivery-secret
+
+  payment:
+    name: payment-service
+    image:
+      repository: payment-service
+      tag: latest
+    replicas: 1
+    port: 5004
+    configMap: payment-config
+    secret: payment-secret
+
+  order:
+    name: order-service
+    image:
+      repository: order-service
+      tag: latest
+    replicas: 1
+    port: 5005
+    configMap: order-config
+    secret: order-secret
+
+  frontend:
+    name: frontend-service
+    image:
+      repository: frontend-service
+      tag: latest
+    replicas: 1
+    port: 3000
+
+  deliveryFrontend:
+    name: delivery-frontend-service
+    image:
+      repository: delivery-frontend-service
+      tag: latest
+    replicas: 1
+    port: 3000
+
+
+hpa:
+
+  order:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpuUtilization: 70
+
+  restaurant:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpuUtilization: 70

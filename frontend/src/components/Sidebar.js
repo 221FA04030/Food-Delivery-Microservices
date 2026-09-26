@@ -42,7 +42,7 @@ function Sidebar({ isOpen, onClose, isLoggedIn, onLogout }) {
             <div className="sidebar-links">
               <Link to="/orders" onClick={onClose}>Orders</Link>
               <Link to="/wallet" onClick={onClose}>Wallet</Link>
-              <Link to="/restaurants" onClick={onClose}>Restaurants</Link>
+              <Link to="/customer/home" onClick={onClose}>Restaurants</Link>
             </div>
 
             <div className="sidebar-actions">

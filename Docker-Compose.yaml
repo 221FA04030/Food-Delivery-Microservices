@@ -1,0 +1,68 @@
+services:
+  auth-service:
+    image: auth-service:latest
+    container_name: auth-service
+    ports: 
+      - "5001:5001"
+    env_file:
+     - ./backend/auth-service/.env
+    networks:
+      - skydash-network
+    
+  payment-service:
+    image: payment-service:latest
+    container_name: payment-service
+    ports: 
+      - "5004:5004"
+    env_file:
+     - ./backend/payment-service/.env
+    networks:
+      - skydash-network
+    
+  restaurant-service:
+    image: restaurant-service:latest
+    container_name: restaurant-service
+    ports: 
+      - "5002:5002"
+    env_file:
+     - ./backend/restaurant-service/.env
+    networks:
+      - skydash-network
+
+  order-service:
+    image: order-service:latest
+    container_name: order-service
+    ports: 
+      - "5005:5005"
+    env_file:
+     - ./backend/order-service/.env
+    networks:
+      - skydash-network
+
+  delivery-service:
+    image: delivery-service:latest
+    container_name: delivery-service
+    ports: 
+      - "5003:5003"
+    env_file:
+     - ./delivery-service/backend/.env
+    networks:
+      - skydash-network
+  frontend:
+    image: frontend-service:latest
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - skydash-network
+
+  delivery-frontend:
+    image: deliver-frontend-service:latest
+    container_name: delivery-frontend
+    ports:
+      - "3001:3000"
+    networks:
+      - skydash-network
+networks:
+  skydash-network:
+    driver: bridge

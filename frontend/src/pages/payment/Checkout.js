@@ -16,7 +16,7 @@ const CheckoutForm = () => {
   const [cardType, setCardType] = useState("");
   const [disablePayment, setDisablePayment] = useState(false);
 
-  const API_BASE_URL = "http://localhost:5004";
+  const API_BASE_URL = "";
 
   // Example order data – in production this comes dynamically from your Order Service.
   const orderData = {

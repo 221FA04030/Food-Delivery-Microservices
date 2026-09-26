@@ -18,7 +18,7 @@ function FoodItemList() {
     const fetchRestaurantFoods = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5002/api/food-items/restaurant/${restaurantId}`
+          `/api/food-items/restaurant/${restaurantId}`
         );
         setFoods(res.data);
       } catch (err) {
@@ -30,7 +30,7 @@ function FoodItemList() {
     const fetchRestaurantDetails = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5001/api/superadmin/restaurant/${restaurantId}`,
+          `/api/superadmin/restaurant/${restaurantId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

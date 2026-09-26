@@ -1,0 +1,49 @@
+{{- if .Values.hpa.order.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+
+  minReplicas: {{ .Values.hpa.order.minReplicas }}
+  maxReplicas: {{ .Values.hpa.order.maxReplicas }}
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.order.cpuUtilization }}
+---
+{{- end }}
+
+{{- if .Values.hpa.restaurant.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: restaurant-service-hpa
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: restaurant-service
+
+  minReplicas: {{ .Values.hpa.restaurant.minReplicas }}
+  maxReplicas: {{ .Values.hpa.restaurant.maxReplicas }}
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.restaurant.cpuUtilization }}
+---
+{{- end }}

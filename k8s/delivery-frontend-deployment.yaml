@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: delivery-frontend
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: delivery-frontend
+
+  template:
+    metadata:
+      labels:
+        app: delivery-frontend
+
+    spec:
+      containers:
+        - name: delivery-frontend
+          image: deliver-frontend-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 3000

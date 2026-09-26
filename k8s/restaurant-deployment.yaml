@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: restaurant-service
+  namespace: skydash
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: restaurant-service
+
+  template:
+    metadata:
+      labels:
+        app: restaurant-service
+
+    spec:
+      containers:
+        - name: restaurant-service
+          image: restaurant-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5002
+
+          envFrom:
+            - configMapRef:
+                name: restaurant-config
+
+            - secretRef:
+                name: restaurant-secret

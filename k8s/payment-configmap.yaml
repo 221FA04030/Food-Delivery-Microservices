@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: payment-config
+  namespace: skydash
+
+data:
+  PORT: "5004"
+  JWT_EXPIRES_IN: "1d"

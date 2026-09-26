@@ -4,7 +4,7 @@ const router = express.Router();
 import jwt from 'jsonwebtoken';
 import Restaurant from '../models/Restaurant.js';
 import authMiddleware from '../middleware/authMiddleware.js';
-import upload from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uplokubectl logs -n skydash deployment/restaurant-service --tail=50adMiddleware.js';
 
 
 // Register a new restaurant (with admin email and password)
@@ -122,6 +122,19 @@ router.put('/availability', authMiddleware, async (req, res) => {
     await restaurant.save();
 
     res.status(200).json({ message: `Restaurant is now ${availability ? 'Open' : 'Closed'}`, availability });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// Get available restaurants for customers
+router.get('/restaurants', async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find({ availability: true })
+      .select('-admin.password');
+
+    res.status(200).json(restaurants);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
