@@ -1,10 +1,14 @@
 # Environment variables
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+**/.env.example
 
 # Node.js dependencies
 node_modules/
+**/node_modules/
 
 # Logs
 *.log
@@ -16,3 +20,13 @@ dist/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Secret files
+*secret*
+*secrets*
+*credential*
+*credentials*
+
+# Generated files that may contain secrets
+**/test.yaml
+**/rendered.yaml

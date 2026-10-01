@@ -4,7 +4,7 @@ services:
     name: auth-service
     image:
       repository: auth-service
-      tag: latest
+      tag: v1
     replicas: 1
     port: 5001
     configMap: auth-config

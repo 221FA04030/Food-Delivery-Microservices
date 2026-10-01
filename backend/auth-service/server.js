@@ -2,13 +2,23 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');  
 const connectDB = require('./config/db');
-
+const client = require('prom-client');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 
+const register = new client.Registry();
+
+client.collectDefaultMetrics({
+  register
+});
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 // Connect DB then start
 connectDB().then(() => {
   app.use('/api/auth', authRoutes);

@@ -1,16 +1,25 @@
 {{- range $name, $service := .Values.services }}
+
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $service.name }}
   namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $service.name }}
+    monitoring: "enabled"
+
 spec:
   type: ClusterIP
+
   selector:
     app: {{ $service.name }}
+
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: {{ $service.port }}
       targetPort: {{ $service.port }}
+
 ---
 {{- end }}

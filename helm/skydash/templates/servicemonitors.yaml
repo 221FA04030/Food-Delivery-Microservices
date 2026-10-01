@@ -1,0 +1,28 @@
+{{- range $name, $service := .Values.services }}
+{{- if or (eq $name "auth") (eq $name "restaurant") (eq $name "delivery") (eq $name "payment") (eq $name "order") }}
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $service.name }}
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+
+  selector:
+    matchLabels:
+      app: {{ $service.name }}
+
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+
+---
+
+{{- end }}
+{{- end }}

@@ -1,13 +1,13 @@
 {{- range $name, $service := .Values.services }}
+
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: {{ $service.name }}
   namespace: {{ $.Release.Namespace }}
 
 spec:
-  replicas: {{ $service.replicas }}
-
   selector:
     matchLabels:
       app: {{ $service.name }}
@@ -23,28 +23,38 @@ spec:
           image: "{{ $service.image.repository }}:{{ $service.image.tag }}"
           imagePullPolicy: IfNotPresent
 
+          {{- if eq $service.name "frontend-service" }}
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=768"
+          {{- end }}
+
           ports:
             - containerPort: {{ $service.port }}
 
           resources:
             requests:
               cpu: "100m"
-              memory: "128Mi"
+              memory: "256Mi"
             limits:
               cpu: "500m"
-              memory: "512Mi"
+              memory: "1Gi"
 
           {{- if or $service.configMap $service.secret }}
           envFrom:
+
             {{- if $service.configMap }}
             - configMapRef:
                 name: {{ $service.configMap }}
             {{- end }}
+
             {{- if $service.secret }}
             - secretRef:
                 name: {{ $service.secret }}
             {{- end }}
+
           {{- end }}
 
 ---
+
 {{- end }}
