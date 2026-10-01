@@ -258,9 +258,3 @@ stripe listen --forward-to localhost:5004/api/payment/webhook
 
 ---
 
-## 12. Demo & Submission
-
-- **GitHub Repo**: [https://github.com/R-Tharanka/Food-Delivery-Microservices.git](https://github.com/R-Tharanka/Food-Delivery-Microservices.git)
-- **Demo Video**: [https://youtu.be/0Y53-xwQHyc](https://youtu.be/0Y53-xwQHyc)
-- **Members**: See [members.md](./members.md)
-
