@@ -21,7 +21,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t chirudevops46/auth-service:v1 ./backend/auth-service
+        run: docker build -t chirudevops46/auth-service:${{ github.sha }} ./backend/auth-service
 
       - name: Push Docker image
-        run: docker push chirudevops46/auth-service:v1
+        run: docker push chirudevops46/auth-service:${{ github.sha }}
