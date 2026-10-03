@@ -3,7 +3,7 @@ services:
   auth:
     name: auth-service
     image:
-      repository: auth-service
+      repository: chirudevops46/auth-service
       tag: v1
     replicas: 1
     port: 5001

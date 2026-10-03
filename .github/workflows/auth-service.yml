@@ -1,4 +1,4 @@
-name: Auth Service CI
+name: Auth Service CI/CD
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
       - ".github/workflows/auth-service.yml"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -25,3 +25,38 @@ jobs:
 
       - name: Push Docker image
         run: docker push chirudevops46/auth-service:${{ github.sha }}
+
+      - name: Create temporary Helm secrets
+        shell: powershell
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          @"
+          secrets:
+            mongoUri: "$env:MONGO_URI"
+            jwtSecret: "$env:JWT_SECRET"
+            stripeSecretKey: "$env:STRIPE_SECRET_KEY"
+          "@ | Set-Content helm/skydash/ci-secrets-values.yaml
+
+      - name: Deploy auth-service to Minikube
+        shell: powershell
+        run: |
+          helm upgrade skydash ./helm/skydash `
+            -n skydash `
+            -f ./helm/skydash/ci-secrets-values.yaml `
+            --server-side=false `
+            --set services.auth.image.repository=chirudevops46/auth-service `
+            --set services.auth.image.tag=${{ github.sha }}
+
+      - name: Verify auth-service rollout
+        shell: powershell
+        run: |
+          kubectl rollout status deployment/auth-service -n skydash
+
+      - name: Remove temporary secrets file
+        if: always()
+        shell: powershell
+        run: |
+          Remove-Item helm/skydash/ci-secrets-values.yaml -Force -ErrorAction SilentlyContinue
