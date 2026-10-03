@@ -13,7 +13,7 @@ services:
   restaurant:
     name: restaurant-service
     image:
-      repository: restaurant-service
+      repository: chirudevops46/restaurant-service
       tag: latest
     replicas: 1
     port: 5002
