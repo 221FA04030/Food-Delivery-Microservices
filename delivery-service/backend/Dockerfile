@@ -1,3 +1,5 @@
+# CI/CD pipeline test
+
 FROM node:20-alpine
 
 WORKDIR /app
