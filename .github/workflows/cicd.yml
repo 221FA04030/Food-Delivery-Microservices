@@ -1,0 +1,189 @@
+name: SKY-DASH CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: self-hosted
+
+    outputs:
+      auth: ${{ steps.filter.outputs.auth }}
+      restaurant: ${{ steps.filter.outputs.restaurant }}
+      delivery: ${{ steps.filter.outputs.delivery }}
+      payment: ${{ steps.filter.outputs.payment }}
+      order: ${{ steps.filter.outputs.order }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      delivery-frontend: ${{ steps.filter.outputs.delivery-frontend }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            auth:
+              - 'backend/auth-service/**'
+
+            restaurant:
+              - 'backend/restaurant-service/**'
+
+            delivery:
+              - 'delivery-service/backend/**'
+
+            payment:
+              - 'backend/payment-service/**'
+
+            order:
+              - 'backend/order-service/**'
+
+            frontend:
+              - 'frontend/**'
+
+            delivery-frontend:
+              - 'delivery-service/frontend/**'
+
+  build-and-deploy:
+    needs: detect-changes
+    runs-on: self-hosted
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: auth
+            name: auth-service
+            path: backend/auth-service
+            repository: chirudevops46/auth-service
+            helmKey: auth
+            deployment: auth-service
+
+          - key: restaurant
+            name: restaurant-service
+            path: backend/restaurant-service
+            repository: chirudevops46/restaurant-service
+            helmKey: restaurant
+            deployment: restaurant-service
+
+          - key: delivery
+            name: delivery-service
+            path: delivery-service/backend
+            repository: chirudevops46/delivery-service
+            helmKey: delivery
+            deployment: delivery-service
+
+          - key: payment
+            name: payment-service
+            path: backend/payment-service
+            repository: chirudevops46/payment-service
+            helmKey: payment
+            deployment: payment-service
+
+          - key: order
+            name: order-service
+            path: backend/order-service
+            repository: chirudevops46/order-service
+            helmKey: order
+            deployment: order-service
+
+          - key: frontend
+            name: frontend-service
+            path: frontend
+            repository: chirudevops46/frontend-service
+            helmKey: frontend
+            deployment: frontend-service
+
+          - key: delivery-frontend
+            name: delivery-frontend-service
+            path: delivery-service/frontend
+            repository: chirudevops46/delivery-frontend-service
+            helmKey: deliveryFrontend
+            deployment: delivery-frontend-service
+
+    steps:
+      - name: Check if service changed
+        id: changed
+        shell: powershell
+        env:
+          AUTH: ${{ needs.detect-changes.outputs.auth }}
+          RESTAURANT: ${{ needs.detect-changes.outputs.restaurant }}
+          DELIVERY: ${{ needs.detect-changes.outputs.delivery }}
+          PAYMENT: ${{ needs.detect-changes.outputs.payment }}
+          ORDER: ${{ needs.detect-changes.outputs.order }}
+          FRONTEND: ${{ needs.detect-changes.outputs.frontend }}
+          DELIVERY_FRONTEND: ${{ needs.detect-changes.outputs.delivery-frontend }}
+          SERVICE_KEY: ${{ matrix.key }}
+        run: |
+          $changed = switch ($env:SERVICE_KEY) {
+            "auth"              { $env:AUTH }
+            "restaurant"       { $env:RESTAURANT }
+            "delivery"         { $env:DELIVERY }
+            "payment"          { $env:PAYMENT }
+            "order"            { $env:ORDER }
+            "frontend"         { $env:FRONTEND }
+            "delivery-frontend" { $env:DELIVERY_FRONTEND }
+          }
+
+          "changed=$changed" >> $env:GITHUB_OUTPUT
+
+      - name: Checkout code
+        if: steps.changed.outputs.changed == 'true'
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        if: steps.changed.outputs.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        if: steps.changed.outputs.changed == 'true'
+        run: docker build -t ${{ matrix.repository }}:${{ github.sha }} ./${{ matrix.path }}
+
+      - name: Push Docker image
+        if: steps.changed.outputs.changed == 'true'
+        run: docker push ${{ matrix.repository }}:${{ github.sha }}
+
+      - name: Create temporary Helm secrets
+        if: steps.changed.outputs.changed == 'true'
+        shell: powershell
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          @"
+          secrets:
+            mongoUri: "$env:MONGO_URI"
+            jwtSecret: "$env:JWT_SECRET"
+            stripeSecretKey: "$env:STRIPE_SECRET_KEY"
+          "@ | Set-Content helm/skydash/ci-secrets-values.yaml
+
+      - name: Deploy service to Minikube
+        if: steps.changed.outputs.changed == 'true'
+        shell: powershell
+        run: |
+          helm upgrade skydash ./helm/skydash `
+            -n skydash `
+            -f ./helm/skydash/ci-secrets-values.yaml `
+            --server-side=false `
+            --set services.${{ matrix.helmKey }}.image.repository=${{ matrix.repository }} `
+            --set services.${{ matrix.helmKey }}.image.tag=${{ github.sha }}
+
+      - name: Verify rollout
+        if: steps.changed.outputs.changed == 'true'
+        shell: powershell
+        run: |
+          kubectl rollout status deployment/${{ matrix.deployment }} -n skydash
+
+      - name: Remove temporary secrets
+        if: always()
+        shell: powershell
+        run: |
+          Remove-Item helm/skydash/ci-secrets-values.yaml -Force -ErrorAction SilentlyContinue
