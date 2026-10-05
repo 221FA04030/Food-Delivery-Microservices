@@ -3,6 +3,14 @@
 A cloud‐native, microservices‐based food ordering & delivery platform.  
 Supports four roles: Customer, Restaurant Admin, Delivery Personnel, Super Admin.
 
+
+## DevOps Documentation
+
+For the complete DevOps implementation, architecture, CI/CD,
+Kubernetes, monitoring, and logging documentation, see:
+
+[DevOps Documentation](./DEVOPS.md)
+
 ---
 
 ## Table of Contents
@@ -257,4 +265,6 @@ stripe listen --forward-to localhost:5004/api/payment/webhook
 ```
 
 ---
+
+
 
